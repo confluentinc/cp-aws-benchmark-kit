@@ -1,0 +1,1073 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "uid": "kafka-cluster-linking",
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Cluster link overview & health",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Link state by broker",
+      "description": "state=active is the healthy steady state. paused/unavailable persisting across brokers means the link isn't mirroring right now.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{state}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Unavailable-link reasons",
+      "description": "Non-zero here is the fastest way to see *why* a link is down: DNS (unresolvable_bootstrap), TCP (bootstrap_tcp_connection_failed), auth, timeout, etc.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_unavailable_link_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{reason}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "row",
+      "title": "Mirroring throughput (headline perf-tuning numbers)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Mirrored bytes/sec by topic",
+      "description": "Per-mirror-topic byte throughput -- the primary number to watch when pushing a large dataset through cluster linking during a workload test.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(kafka_server_cluster_link_metrics_mirror_topic_byte_total{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\",topic=~\"$mirror_topic\"}[$__rate_interval])) by (topic)",
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Mirrored messages/sec by topic",
+      "description": "Message-rate companion to the byte-rate panel -- useful for spotting small-message overhead vs large-message bandwidth limits.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_mirror_topic_message_rate_per_second{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\",topic=~\"$mirror_topic\"}",
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Mirror lag & recovery point objective (RPO)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Mirror lag by topic (records behind source)",
+      "description": "Record-count lag per mirror topic -- this is the number that should trend to zero/steady-state under a sustained workload; a climbing lag means the fetcher can't keep up with produce rate.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_mirror_topic_lag{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\",topic=~\"$mirror_topic\"}",
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Mirror RPO by topic (seconds of data at risk)",
+      "description": "How far behind the source the mirror is in wall-clock time -- the direct 'how much would we lose in a failover right now' metric.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_mirror_topic_rpo_seconds{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\",topic=~\"$mirror_topic\"}",
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Fetcher network throughput & timing",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Fetcher connection throughput",
+      "description": "Raw network throughput of the fetcher's TCP connection to the source cluster -- compare against confluent.cluster.link.io.max.bytes.per.second and available TGW/link bandwidth to see if you're bandwidth-bound.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_fetcher_metrics_incoming_byte_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} incoming",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_fetcher_metrics_outgoing_byte_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} outgoing",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Fetcher append & fetch-call timing",
+      "description": "append-time = writing fetched data to the local log (disk-bound); fetch-time = round trip to the source cluster (network-bound). Whichever dominates tells you where to tune first.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_append_time_avg{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} append avg",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_append_time_max{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} append max",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_fetch_time_avg{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} fetch avg",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_fetch_time_max{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} fetch max",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "row",
+      "title": "Fetcher partition health (where the bottleneck is)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Degraded / unassigned partitions",
+      "description": "Degraded partitions aren't mirroring at full speed for the stated reason; unassigned partitions aren't being fetched by any fetcher thread at all -- both directly cap achievable throughput.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_degraded_partition_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} degraded: {{reason}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_unassigned_partition_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} unassigned",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Throttled partitions & fetcher offset lag",
+      "description": "Fetcher-level lag aggregate (compare against the per-topic mirror-lag panel above to see if lag is concentrated on one topic or spread across all of them).",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_throttled_partition_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} throttled partitions",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_max_last_stable_offset_lag{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} max stable-offset lag",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_total_last_stable_offset_lag{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} total stable-offset lag",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "row",
+      "title": "Throttling (confluent.cluster.link.io.max.bytes.per.second and friends)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "Fetch/produce/destination-lag throttle events",
+      "description": "Non-zero and sustained means the destination broker (or the configured io.max.bytes.per.second cap) is actively throttling the fetcher -- raise the cap or investigate destination broker load before assuming the network is the ceiling.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 46
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_produce_throttle_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} produce throttle/sec",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_request_throttle_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} request throttle/sec",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_destination_lag_link_fetcher_throttle_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} destination-lag throttle/sec",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "type": "timeseries",
+      "title": "Client connection throttling",
+      "description": "Connection-level (as opposed to byte-level) throttling on the link's client connections.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 46
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_client_connections_throttle_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} connections throttled/sec",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "type": "row",
+      "title": "Purgatory backpressure & mirror replica health",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 54
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "ClusterLink purgatory (delayed operations)",
+      "description": "Requests parked waiting on cluster-link-specific conditions. A large, sustained PurgatorySize here is direct evidence of backpressure specifically from mirroring, separate from normal Produce/Fetch purgatory (see the broker tuning dashboard).",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 55
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_delayedoperationpurgatory_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",delayedOperation=\"ClusterLink\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Mirror replica health",
+      "description": "Broker-side replica-manager view of mirror partitions -- BlockedOnMirrorSourcePartitionCount rising means partitions are stalled waiting on the source, independent of the fetcher-level metrics above.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 55
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_replicamanager_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",name=~\"UnderReplicatedMirrorPartitions|UnderMinIsrMirrorPartitionCount|BlockedOnMirrorSourcePartitionCount\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{name}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_replicamanager_oneminuterate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",name=\"ThrottledClusterLinkReplicasPerSec\"}",
+          "legendFormat": "{{kubernetes_pod_name}} throttled replicas/sec",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "row",
+      "title": "Mirror topic/partition inventory & failures",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 23,
+      "type": "timeseries",
+      "title": "Mirror topic & partition counts",
+      "description": "Inventory + failure reasons in one place -- a growing failed-mirror-topic count for a specific reason (e.g. UNSUPPORTED_MIRROR_STATE, TRUNCATION_BELOW_HIGH_WATERMARK) points at a config/compatibility problem rather than a throughput problem.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 64
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_cluster_link_metrics_mirror_topic_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"})",
+          "legendFormat": "total mirror topics",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_cluster_link_metrics_mirror_partition_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"})",
+          "legendFormat": "total mirror partitions",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_cluster_link_metrics_failed_mirror_topic_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}) by (reason)",
+          "legendFormat": "failed: {{reason}}",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "type": "timeseries",
+      "title": "Auto-mirror-topic creation activity",
+      "description": "Relevant when sending large new datasets that create many new source topics for the first time -- watch for auto-mirror-creation failures keeping up with the topic-creation rate.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 64
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_cluster_link_metrics_auto_mirror_created_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"})",
+          "legendFormat": "auto-created/sec",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_cluster_link_metrics_auto_mirror_create_failed_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}) by (reason)",
+          "legendFormat": "create failed: {{reason}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "type": "row",
+      "title": "Cluster link admin / control-plane latency",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 72
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 26,
+      "type": "timeseries",
+      "title": "Local & remote admin request time",
+      "description": "Latency of the link's own internal admin-client calls (metadata, ACL sync, offset sync) to the local vs. remote (source) cluster -- high remote-admin time usually tracks the same network path as the fetcher connection.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 73
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_local_admin_request_time_ms_avg{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} local admin avg",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_remote_admin_request_time_ms_avg{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} remote admin avg",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "type": "timeseries",
+      "title": "Mirror-management REST calls (create/failover)",
+      "description": "Admin REST API latency for CreateMirror/FailoverMirror calls -- this is the path CFK's KafkaTopic/ClusterLink operators and Control Center go through, separate from the data-plane fetcher path above.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 73
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_rest_jersey_metrics_v3_mirrors_create_request_latency_avg{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\"}",
+          "legendFormat": "{{kubernetes_pod_name}} create latency avg",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_rest_jersey_metrics_v3_mirrors_failover_request_latency_avg{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\"}",
+          "legendFormat": "{{kubernetes_pod_name}} failover latency avg",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "type": "row",
+      "title": "CLUSTERLINK listener connection health",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 81
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 29,
+      "type": "timeseries",
+      "title": "Oldest CLUSTERLINK connection age",
+      "description": "How long-lived the cluster-link listener's connections are -- compare with the REPLICATION/INTERNAL listeners on the broker tuning dashboard to see if this listener is being recycled unusually often.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_network_socketserver_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",listener=\"CLUSTERLINK\",name=\"OldestConnectionAgeMs\"}",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "type": "timeseries",
+      "title": "CLUSTERLINK connections killed / pipelined",
+      "description": "Sustained connection kills force the fetcher to reconnect/re-authenticate mid-workload, which shows up as brief throughput dips on the mirroring-throughput panels above.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_network_socketserver_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",listener=\"CLUSTERLINK\",name=~\"AgedConnectionsKilledCount|ExpiredConnectionsKilledCount|ConnectionsWithRequestPipelinedCount\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{name}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "tags": [
+    "cfk",
+    "confluent",
+    "kafka",
+    "cluster-linking",
+    "tuning"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "namespace",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": "label_values(up{job=\"cfk-jmx\"}, kubernetes_namespace)",
+        "refresh": 2,
+        "multi": false,
+        "includeAll": false
+      },
+      {
+        "name": "link_name",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": "label_values(kafka_server_cluster_link_metrics_link_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\"}, link_name)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true
+      },
+      {
+        "name": "mirror_topic",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": "label_values(kafka_server_cluster_link_metrics_mirror_topic_byte_total{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",link_name=~\"$link_name\"}, topic)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Kafka Cluster Linking - $namespace",
+  "version": 1,
+  "schemaVersion": 39
+}

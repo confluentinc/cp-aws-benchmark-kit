@@ -1,0 +1,841 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Producer throughput",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Records, requests, and bytes",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_record_send_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_record_send_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} records/sec",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_request_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_request_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} requests/sec",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_outgoing_byte_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_outgoing_byte_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} bytes/sec",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Producer throttling and errors",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_record_error_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_record_error_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} errors/sec",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_record_retry_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_record_retry_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} retries/sec",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_produce_throttle_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_produce_throttle_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} throttle ms",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Producer latency and batching",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Producer request latency",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_request_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_request_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} avg latency",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_producer_producer_metrics_request_latency_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_request_latency_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} max latency",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_record_queue_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_record_queue_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} queue time",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Batch size and compression",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_batch_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_batch_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} batch bytes",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_request_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_request_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} request bytes",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_compression_rate_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_compression_rate_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} compression rate",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Producer client saturation / tuning signals",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Producer I/O and buffer pressure",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_io_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_io_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} I/O ratio",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_io_wait_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_io_wait_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} I/O wait ratio",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_bufferpool_wait_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_bufferpool_wait_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} buffer wait ratio",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "Producer record and request sizing",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_record_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_record_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} record bytes",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_records_per_request_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_records_per_request_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} records/request",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 30,
+      "type": "row",
+      "title": "Batching, buffering & compression tuning",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 31,
+      "type": "timeseries",
+      "title": "Batch size & splits",
+      "description": "Rising batch-split rate means records/compressed batches exceed max.request.size -- increase batch.size headroom or lower compression ratio expectations.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_batch_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_batch_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} batch size avg",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_producer_producer_metrics_batch_size_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_batch_size_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} batch size max",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "type": "timeseries",
+      "title": "Buffer pool pressure",
+      "description": "buffer_exhausted_rate > 0 or waiting_threads > 0 means buffer.memory is too small for the current batch.size/linger.ms/throughput combination.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_buffer_available_bytes{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_buffer_available_bytes{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} buffer available bytes",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_buffer_exhausted_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_buffer_exhausted_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} buffer exhausted/sec",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_waiting_threads{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_waiting_threads{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} threads waiting on buffer",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "type": "row",
+      "title": "Producer session & connection health",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 34,
+      "type": "timeseries",
+      "title": "Client connections",
+      "description": "Repeated create/close churn (rather than a small stable connection count) points to broker-side idle-connection reaping or client-side reconnect storms.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_connection_count{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_connection_count{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} open connections",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_connection_creation_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_connection_creation_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} connections created/sec",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_connection_close_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_connection_close_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} connections closed/sec",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "type": "timeseries",
+      "title": "Reauthentication latency (session duration)",
+      "description": "Only populated when connections.max.reauth.ms / SASL session re-auth is configured; otherwise stays empty because sessions never expire.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_reauthentication_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_reauthentication_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} reauth latency avg",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_producer_producer_metrics_reauthentication_latency_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_reauthentication_latency_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} reauth latency max",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "type": "row",
+      "title": "Producer queueing & retry detail",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 37,
+      "type": "timeseries",
+      "title": "Record queue time (accumulator wait -- serialization + batching delay)",
+      "description": "Kafka's Java client has no separate serializer-time JMX metric -- record-queue-time is the closest proxy: time a record sits in the accumulator (post-serialize) waiting for its batch to be sent. High values -> raise batch.size or lower linger.ms.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_record_queue_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_record_queue_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} queue time avg",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_producer_producer_metrics_record_queue_time_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_record_queue_time_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} queue time max",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "type": "timeseries",
+      "title": "Retries vs buffer-pool wait ratio",
+      "description": "If retries track broker throttling/errors (see 'Producer throttling and errors' above) rather than bufferpool wait, the bottleneck is broker-side, not client memory.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_producer_producer_metrics_record_retry_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_record_retry_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} retries/sec",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_producer_producer_metrics_bufferpool_wait_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"} or kafka_producer_bufferpool_wait_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$producer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} bufferpool wait ratio",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "confluent",
+    "kafka",
+    "producer",
+    "performance"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "label": "Prometheus",
+        "current": {
+          "text": "Prometheus",
+          "value": "Prometheus"
+        },
+        "hide": 0
+      },
+      {
+        "name": "namespace",
+        "type": "query",
+        "label": "Namespace",
+        "query": "label_values(up{job=\\\"kafka-client-jmx\\\"}, namespace)",
+        "definition": "label_values(up{job=\\\"kafka-client-jmx\\\"}, namespace)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "cflt-east1",
+          "value": "cflt-east1"
+        }
+      },
+      {
+        "name": "pod",
+        "type": "query",
+        "label": "Client pod",
+        "query": "label_values(up{job=\\\"kafka-client-jmx\\\",namespace=~\\\"$namespace\\\"}, pod)",
+        "definition": "label_values(up{job=\\\"kafka-client-jmx\\\",namespace=~\\\"$namespace\\\"}, pod)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      },
+      {
+        "name": "producer_client",
+        "type": "query",
+        "label": "Client ID",
+        "query": "label_values((kafka_producer_producer_metrics_record_send_rate{job=\\\"kafka-client-jmx\\\",namespace=~\\\"$namespace\\\",pod=~\\\"$pod\\\"} or kafka_producer_record_send_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\"}), client_id)",
+        "definition": "label_values(kafka_producer_producer_metrics_record_send_rate{job=\\\"kafka-client-jmx\\\",namespace=~\\\"$namespace\\\",pod=~\\\"$pod\\\"}, client_id)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Kafka Producer Performance / Tuning",
+  "uid": "kafka-producer-performance",
+  "version": 1
+}

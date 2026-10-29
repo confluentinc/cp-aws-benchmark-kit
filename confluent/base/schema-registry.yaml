@@ -1,0 +1,24 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-schema-registry:8.3.1
+    init: confluentinc/confluent-init-container:3.3.1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.$(NAMESPACE).svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        secretRef: client-tls-admin
+  podTemplate:
+    resources:
+      limits:
+        cpu: "1"
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi

@@ -1,0 +1,26 @@
+# Topology B patch — enables staticForHostBasedRouting on the EXTERNAL listener.
+# CFK auto-creates ClusterIP Services named kafka-{N}-internal:9092 for nginx
+# to target. Brokers advertise b{N}.<domain>:443 as the EXTERNAL listener.
+#
+# PLACEHOLDER replaced by install.sh:
+#   __DOMAIN__ → DOMAIN_REGION{1,2} from .env
+
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+spec:
+  listeners:
+    external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.-]*)?.*/$1/
+      tls:
+        enabled: true
+      externalAccess:
+        type: staticForHostBasedRouting
+        staticForHostBasedRouting:
+          port: 443
+          domain: __DOMAIN__
+          brokerPrefix: b

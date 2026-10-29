@@ -1,0 +1,631 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "uid": "kafka-broker-tuning",
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Thread pool saturation (network & I/O threads)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Network processor idle %",
+      "description": "Fraction of time network threads are idle. Sustained values well below ~0.3-0.2 mean num.network.threads is undersized for the current connection/request volume.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_network_socketserver_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=\"NetworkProcessorAvgIdlePercent\"}",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "I/O thread (request handler) idle %",
+      "description": "Fraction of time I/O (request handler) threads are idle. This is the single most important num.io.threads sizing signal -- sustained low idle % under load means requests queue up waiting for a handler thread.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_kafkarequesthandlerpool_oneminuterate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=~\"RequestHandlerAvgIdlePercent|BrokerRequestHandlerAvgIdlePercent|ControllerRequestHandlerAvgIdlePercent\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "row",
+      "title": "Request & response queues",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Request queue size (waiting for an I/O thread)",
+      "description": "Requests parked here are waiting for a free I/O thread -- growing alongside low I/O-thread idle % confirms the handler pool is the bottleneck.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_network_requestchannel_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=\"RequestQueueSize\"}",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Response queue size (summed across network processors)",
+      "description": "Responses waiting to be written back to clients -- growth here points at network-thread saturation or slow/congested client connections rather than I/O-thread saturation.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_network_requestchannel_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=\"ResponseQueueSize\"}) by (kubernetes_pod_name)",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Purgatory / delayed operations (acks=all, fetch.min.bytes, cluster-link fetch waits)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Purgatory size by operation type",
+      "description": "Requests parked waiting on a condition: Produce = waiting for acks=all replication; Fetch = waiting for fetch.min.bytes/max.wait.ms; ClusterLink = mirror fetches waiting on the source cluster. A permanently large purgatory for one type points straight at the tuning knob to adjust.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_delayedoperationpurgatory_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=\"PurgatorySize\",delayedOperation=~\"$delayed_op\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{delayedOperation}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Delayed operations currently in flight",
+      "description": "Companion to purgatory size -- distinguishes many small waits from a few very large ones (watch alongside the latency breakdown panel below).",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_delayedoperationpurgatory_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=\"NumDelayedOperations\",delayedOperation=~\"$delayed_op\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{delayedOperation}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Request latency breakdown by API (queue / local / remote / response)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Mean latency by phase",
+      "description": "RequestQueueTimeMs high -> I/O-thread starvation (see thread pool row). LocalTimeMs high -> the handler itself is slow (e.g. disk I/O). RemoteTimeMs high -> waiting on replication/purgatory (acks=all). ResponseQueueTimeMs/ResponseSendTimeMs high -> network-thread or client-side congestion.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_network_requestmetrics_mean{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=~\"RequestQueueTimeMs|LocalTimeMs|RemoteTimeMs|ResponseQueueTimeMs|ResponseSendTimeMs\",request=~\"$request_type\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{request}} {{name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Total request time, p99",
+      "description": "End-to-end p99 per request API -- the headline number for 'is this API fast enough', with the panel to the left showing which phase to go fix.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_network_requestmetrics_99thpercentile{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=\"TotalTimeMs\",request=~\"$request_type\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{request}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "row",
+      "title": "Per-listener connection health (tune INTERNAL / REPLICATION / CLUSTERLINK listeners)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Oldest connection age by listener",
+      "description": "Per-listener connection lifetime -- compare CLUSTERLINK/REPLICATION against INTERNAL/EXTERNAL to see whether cross-cluster or inter-broker connections are being recycled more/less aggressively than client connections.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_network_socketserver_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=\"OldestConnectionAgeMs\",listener=~\"$listener\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{listener}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Aged / expired connections killed",
+      "description": "Sustained kills on the CLUSTERLINK or REPLICATION listener force reconnect/re-auth overhead on every occurrence -- tune connections.max.idle.ms / connection.max.reauth.ms per listener if this is high.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_network_socketserver_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\",name=~\"AgedConnectionsKilledCount|ExpiredConnectionsKilledCount\",listener=~\"$listener\"}",
+          "legendFormat": "{{kubernetes_pod_name}} {{listener}} {{name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "row",
+      "title": "Disk flush latency (log segment fsync)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "Log flush latency",
+      "description": "Rising fsync latency directly inflates LocalTimeMs for Produce requests (see latency-breakdown row) -- a disk/EBS throughput ceiling shows up here first.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 46
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_log_logflushstats_mean{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\"}",
+          "legendFormat": "{{kubernetes_pod_name}} mean",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_log_logflushstats_99thpercentile{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\"}",
+          "legendFormat": "{{kubernetes_pod_name}} p99",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "type": "timeseries",
+      "title": "Log flush rate",
+      "description": "Flushes/sec -- combine with flush latency to estimate total fsync time budget per broker.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 46
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_log_logflushstats_oneminuterate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$broker\"}",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "tags": [
+    "cfk",
+    "confluent",
+    "kafka",
+    "broker",
+    "tuning"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "namespace",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": "label_values(up{job=\"cfk-jmx\"}, kubernetes_namespace)",
+        "refresh": 2,
+        "multi": false,
+        "includeAll": false
+      },
+      {
+        "name": "broker",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": "label_values(up{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",app=\"kafka\"}, kubernetes_pod_name)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true
+      },
+      {
+        "name": "listener",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": "label_values(kafka_network_socketserver_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",name=\"OldestConnectionAgeMs\"}, listener)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true
+      },
+      {
+        "name": "request_type",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": "label_values(kafka_network_requestmetrics_mean{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\"}, request)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true
+      },
+      {
+        "name": "delayed_op",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": "label_values(kafka_server_delayedoperationpurgatory_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\"}, delayedOperation)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Kafka Broker - Request, Thread & Purgatory Tuning - $namespace",
+  "version": 1,
+  "schemaVersion": 39
+}

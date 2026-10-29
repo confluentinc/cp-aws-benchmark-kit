@@ -1,0 +1,3238 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "CFK scrape targets UP",
+      "description": "Number of CFK JMX exporter pods currently scraped successfully.",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(up{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Kafka brokers",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "count(kafka_server_replicamanager_value{name=\"LeaderCount\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Active controllers",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_controller_kafkacontroller_value{name=\"ActiveControllerCount\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Under-replicated partitions",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_replicamanager_value{name=\"UnderReplicatedPartitions\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Offline partitions",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_replicamanager_value{name=\"OfflineReplicaCount\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Connect task failures",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connect_worker_metrics_task_startup_failure_total{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Kafka throughput",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesInPerSec\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "Bytes in",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesOutPerSec\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "Bytes out",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Kafka request rates",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"TotalProduceRequestsPerSec\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "Produce",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"TotalFetchRequestsPerSec\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "Fetch",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_kafkarequesthandlerpool_oneminuterate{name=\"RequestHandlerAvgIdlePercent\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}) * 100",
+          "legendFormat": "Request handler idle %",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Kafka health by pod",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 23
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_replicamanager_value{name=\"UnderReplicatedPartitions\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_replicamanager_value{name=\"OfflineReplicaCount\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} offline",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "JVM memory",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 23
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(jvm_memory_bytes_used{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}) by (kubernetes_pod_name)",
+          "legendFormat": "{{kubernetes_pod_name}} used",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(jvm_memory_bytes_max{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}) by (kubernetes_pod_name)",
+          "legendFormat": "{{kubernetes_pod_name}} max",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "JVM process CPU",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(process_cpu_seconds_total{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}[5m])) by (kubernetes_pod_name)",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "Kafka produce / fetch failures",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"FailedProduceRequestsPerSec\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "Failed produce",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"FailedFetchRequestsPerSec\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "Failed fetch",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_controller_controllerstats_oneminuterate{name=\"UncleanLeaderElectionsPerSec\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "Unclean elections",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Kafka Connect workers",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connect_worker_metrics_connector_count{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}) by (kubernetes_pod_name)",
+          "legendFormat": "{{kubernetes_pod_name}} connectors",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connect_worker_metrics_task_count{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}) by (kubernetes_pod_name)",
+          "legendFormat": "{{kubernetes_pod_name}} tasks",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connect_worker_metrics_connector_startup_failure_total{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "connector startup failures",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connect_worker_metrics_task_startup_failure_total{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "task startup failures",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "Kafka Connect I/O",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_connect_connect_metrics_incoming_byte_rate{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} incoming",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_connect_connect_metrics_outgoing_byte_rate{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} outgoing",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_connect_connect_metrics_io_ratio{kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}",
+          "legendFormat": "{{kubernetes_pod_name}} I/O ratio",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "timeseries",
+      "title": "Schema Registry connections",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"schemaregistry_.*_jetty_metrics_connections_active\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "active",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"schemaregistry_.*_jetty_metrics_connections_opened_rate\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "opened rate",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"schemaregistry_.*_jetty_metrics_connections_closed_rate\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "closed rate",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "type": "timeseries",
+      "title": "ksqlDB query activity",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 47
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_active_queries\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "active",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_idle_queries\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "idle",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_persistent_queries\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "persistent",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 100,
+      "type": "row",
+      "title": "CP Flink",
+      "description": "Metrics for this Confluent Platform component.",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 101,
+      "type": "stat",
+      "title": "Flink running jobs",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_jobmanager_numRunningJobs{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 102,
+      "type": "stat",
+      "title": "Registered TaskManagers",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_jobmanager_numRegisteredTaskManagers{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 103,
+      "type": "stat",
+      "title": "Available task slots",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 8,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_jobmanager_taskSlotsAvailable{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 104,
+      "type": "stat",
+      "title": "Flink job restarts",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_jobmanager_job_numRestarts{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 105,
+      "type": "stat",
+      "title": "Checkpoint failures",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_jobmanager_job_numberOfFailedCheckpoints{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 106,
+      "type": "stat",
+      "title": "Backpressured tasks",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 58
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_taskmanager_job_task_isBackPressured{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 107,
+      "type": "timeseries",
+      "title": "Flink checkpoint health",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 64
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max(flink_jobmanager_job_lastCheckpointDuration{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "last duration",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_jobmanager_job_numberOfFailedCheckpoints{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "failed checkpoints",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_jobmanager_job_totalNumberOfCheckpoints{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "total checkpoints",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 108,
+      "type": "timeseries",
+      "title": "Flink records in / out",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 64
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_taskmanager_job_task_numRecordsInPerSecond{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "records in",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_taskmanager_job_task_numRecordsOutPerSecond{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "records out",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_taskmanager_job_task_operator_numRecordsInErrors{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "record errors",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 109,
+      "type": "timeseries",
+      "title": "Flink TaskManager backpressure",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 72
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_taskmanager_job_task_busyTimeMsPerSecond{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"}) / 1000",
+          "legendFormat": "busy ratio",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_taskmanager_job_task_backPressuredTimeMsPerSecond{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"}) / 1000",
+          "legendFormat": "backpressured ratio",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_taskmanager_job_task_isBackPressured{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "backpressured task count",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 110,
+      "type": "timeseries",
+      "title": "Flink JVM CPU and memory",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 72
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max(flink_taskmanager_Status_JVM_CPU_Load{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "TaskManager CPU",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(flink_taskmanager_Status_JVM_Memory_Heap_Used{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"} + flink_taskmanager_Status_JVM_Memory_NonHeap_Used{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "TaskManager memory",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max(flink_jobmanager_Status_JVM_CPU_Load{job=\"cp-flink\",flink_cluster_id=~\"$flink_cluster_id\",pod=~\"$flink_pod\"})",
+          "legendFormat": "JobManager CPU",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 120,
+      "type": "row",
+      "title": "Cluster Linking",
+      "description": "Metrics for this Confluent Platform component.",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 81
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 121,
+      "type": "table",
+      "title": "Cluster Link status",
+      "description": "",
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",link_name=~\"$cluster_link\"}",
+          "legendFormat": "{{link_name}} - state {{state}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 122,
+      "type": "stat",
+      "title": "Mirror topics",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_cluster_link_metrics_mirror_topic_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",link_name=~\"$cluster_link\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 123,
+      "type": "stat",
+      "title": "Mirror partitions",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_cluster_link_metrics_mirror_partition_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",link_name=~\"$cluster_link\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 124,
+      "type": "stat",
+      "title": "Under-replicated mirrors",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 82
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_replicamanager_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",name=\"UnderReplicatedMirrorPartitions\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 125,
+      "type": "timeseries",
+      "title": "Cluster Link lag and fetcher health",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 89
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_link_fetcher_max_last_stable_offset_lag{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",link_name=~\"$cluster_link\"}",
+          "legendFormat": "{{link_name}} max lag",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_unavailable_link_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",link_name=~\"$cluster_link\"}",
+          "legendFormat": "{{link_name}} unavailable ({{reason}})",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_metrics_failed_mirror_topic_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",link_name=~\"$cluster_link\"}",
+          "legendFormat": "{{link_name}} failed mirror topics ({{reason}})",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 126,
+      "type": "timeseries",
+      "title": "Cluster Link fetch throughput",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 89
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_cluster_link_fetcher_metrics_incoming_byte_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",link_name=~\"$cluster_link\"}",
+          "legendFormat": "{{link_name}} fetcher incoming byte rate",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "kafka_server_replicamanager_oneminuterate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",name=\"ThrottledClusterLinkReplicasPerSec\"}",
+          "legendFormat": "{{kubernetes_pod_name}} throttled replicas",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 127,
+      "type": "stat",
+      "title": "Blocked mirror partitions",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 97
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_replicamanager_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",name=\"BlockedOnMirrorSourcePartitionCount\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 128,
+      "type": "stat",
+      "title": "Mirrors under min ISR",
+      "description": "",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 97
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_replicamanager_value{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",name=\"UnderMinIsrMirrorPartitionCount\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 129,
+      "type": "timeseries",
+      "title": "Cluster Link management request latency",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 97
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg(kafka_network_requestmetrics_mean{request=~\"CreateClusterLinks|DeleteClusterLinks|ListClusterLinks|AlterClusterLinks|DescribeClusterLinks\",job=\"cfk-jmx\",name=\"TotalTimeMs\"})",
+          "legendFormat": "total time ms",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg(kafka_network_requestmetrics_mean{request=~\"CreateClusterLinks|DeleteClusterLinks|ListClusterLinks|AlterClusterLinks|DescribeClusterLinks\",job=\"cfk-jmx\",name=\"RequestQueueTimeMs\"})",
+          "legendFormat": "request queue ms",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg(kafka_network_requestmetrics_mean{request=~\"CreateClusterLinks|DeleteClusterLinks|ListClusterLinks|AlterClusterLinks|DescribeClusterLinks\",job=\"cfk-jmx\",name=\"RemoteTimeMs\"})",
+          "legendFormat": "remote time ms",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 200,
+      "type": "row",
+      "title": "Kafka / Broker",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 107
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 201,
+      "type": "timeseries",
+      "title": "Broker controller and replication health",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 108
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_controller_kafkacontroller_value{name=\"ActiveControllerCount\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "active controllers",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_replicamanager_value{name=\"UnderReplicatedPartitions\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "under-replicated partitions",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_replicamanager_value{name=\"OfflineReplicaCount\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "offline replicas",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 202,
+      "type": "timeseries",
+      "title": "Broker traffic",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 108
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesInPerSec\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "bytes in",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesOutPerSec\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "bytes out",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"MessagesInPerSec\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "messages in",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 210,
+      "type": "row",
+      "title": "KRaft",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 117
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 211,
+      "type": "stat",
+      "title": "KRaft quorum leader health",
+      "description": "",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 118
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_raft_metrics_current_leader{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}) / count(kafka_server_raft_metrics_current_leader{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "leader known ratio",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 212,
+      "type": "timeseries",
+      "title": "KRaft current epoch and high watermark",
+      "description": "",
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 6,
+        "y": 118
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max(kafka_server_raft_metrics_current_epoch{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "current epoch",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max(kafka_server_raft_metrics_high_watermark{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "high watermark",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 213,
+      "type": "timeseries",
+      "title": "KRaft election and fetch activity",
+      "description": "",
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 118
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max(kafka_server_raft_metrics_election_latency_avg{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "election latency avg",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_server_raft_metrics_fetch_records_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "fetch records rate",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 220,
+      "type": "row",
+      "title": "Schema Registry",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 125
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 221,
+      "type": "timeseries",
+      "title": "Schema Registry connections",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 126
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"schemaregistry_.*_jetty_metrics_connections_active\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "active connections",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"schemaregistry_.*_jetty_metrics_connections_opened_rate\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "opened rate",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"schemaregistry_.*_jetty_metrics_connections_closed_rate\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "closed rate",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 222,
+      "type": "timeseries",
+      "title": "Schema Registry API activity",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 126
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"schemaregistry_.*_jersey_metrics_.*_request_rate\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "request rate",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum({__name__=~\"schemaregistry_.*_jersey_metrics_.*_request_error_rate\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "request error rate",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg({__name__=~\"schemaregistry_.*_jersey_metrics_.*_request_latency_avg\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "latency avg",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 230,
+      "type": "row",
+      "title": "Kafka Connect / Connectors",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 135
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 231,
+      "type": "timeseries",
+      "title": "Connect connector task state",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 136
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connector_metrics_connector_total_task_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",connector=~\"$connector\"}) by (connector)",
+          "legendFormat": "{{connector}} total tasks",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connector_metrics_connector_running_task_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",connector=~\"$connector\"}) by (connector)",
+          "legendFormat": "{{connector}} running tasks",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connector_metrics_connector_failed_task_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",connector=~\"$connector\"}) by (connector)",
+          "legendFormat": "{{connector}} failed tasks",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_connector_metrics_connector_paused_task_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",connector=~\"$connector\"}) by (connector)",
+          "legendFormat": "{{connector}} paused tasks",
+          "refId": "D"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 232,
+      "type": "timeseries",
+      "title": "Connector record throughput",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 136
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_source_task_metrics_source_record_poll_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",connector=~\"$connector\"}) by (connector)",
+          "legendFormat": "{{connector}} source records",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_connect_sink_task_metrics_sink_record_read_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\",connector=~\"$connector\"}) by (connector)",
+          "legendFormat": "{{connector}} sink records",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 240,
+      "type": "row",
+      "title": "REST Proxy",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 145
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 241,
+      "type": "timeseries",
+      "title": "REST Proxy connections and threads",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 146
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_rest_jetty_metrics_connections_active{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "active connections",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_rest_jetty_metrics_busy_thread_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "busy threads",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg(kafka_rest_jetty_metrics_thread_pool_usage{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "thread pool usage",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 242,
+      "type": "timeseries",
+      "title": "REST Proxy request rate and errors",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 146
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_rest_jetty_metrics_request_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "request rate",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_rest_jetty_metrics_request_error_rate{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "request error rate",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg(kafka_rest_jersey_metrics_request_latency_avg{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "request latency avg",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 250,
+      "type": "row",
+      "title": "Self-Balancing Cluster (SBC)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 155
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 251,
+      "type": "timeseries",
+      "title": "SBC balancer state",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 156
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_databalancer_databalancer_info_value{name=\"IsActive\",type=\"DataBalancer\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "active balancer",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_databalancer_databalancer_value{name=\"PartitionsRemaining\",type=\"DataBalancer\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "partitions remaining",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_databalancer_databalancer_value{name=\"BytesMoved\",type=\"DataBalancer\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"})",
+          "legendFormat": "bytes moved",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 252,
+      "type": "timeseries",
+      "title": "SBC rebalance operations",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 156
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_databalancer_databalancer_oneminuterate{name=~\"NumPartitionBalanceFailed|NumPartitionBalanceStarted|NumPartitionBalanceSucceeded\",type=\"DataBalancer\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}) by (name)",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(kafka_databalancer_databalancer_oneminuterate{name=~\"BytesMovedPerSec|BytesWrittenPerSec\",type=\"DataBalancer\",job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\",platform_confluent_io_type=~\"$controller_type\",app=~\"$component_name\"}) by (name)",
+          "legendFormat": "{{name}}",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "confluent",
+    "cfk",
+    "kafka",
+    "jmx"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "label": "Prometheus",
+        "current": {
+          "text": "Prometheus",
+          "value": "Prometheus"
+        },
+        "hide": 0
+      },
+      {
+        "name": "namespace",
+        "type": "query",
+        "label": "Namespace",
+        "query": "label_values(up{job=\\\"cfk-jmx\\\"}, kubernetes_namespace)",
+        "definition": "label_values(up{job=\\\"cfk-jmx\\\"}, kubernetes_namespace)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "cflt-east1",
+          "value": "cflt-east1"
+        }
+      },
+      {
+        "name": "controller_type",
+        "type": "query",
+        "label": "Component type",
+        "query": "label_values(up{job=\\\"cfk-jmx\\\",kubernetes_namespace=~\\\"$namespace\\\"}, platform_confluent_io_type)",
+        "definition": "label_values(up{job=\\\"cfk-jmx\\\",kubernetes_namespace=~\\\"$namespace\\\"}, platform_confluent_io_type)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      },
+      {
+        "name": "component_name",
+        "type": "query",
+        "label": "Component",
+        "query": "label_values(up{job=\\\"cfk-jmx\\\",kubernetes_namespace=~\\\"$namespace\\\",platform_confluent_io_type=~\\\"$controller_type\\\"}, app)",
+        "definition": "label_values(up{job=\\\"cfk-jmx\\\",kubernetes_namespace=~\\\"$namespace\\\",platform_confluent_io_type=~\\\"$controller_type\\\"}, app)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      },
+      {
+        "name": "flink_cluster_id",
+        "type": "query",
+        "label": "Flink cluster",
+        "query": "label_values(flink_jobmanager_numRunningJobs{job=\\\"cp-flink\\\"}, flink_cluster_id)",
+        "definition": "label_values(flink_jobmanager_numRunningJobs{job=\\\"cp-flink\\\"}, flink_cluster_id)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      },
+      {
+        "name": "flink_pod",
+        "type": "query",
+        "label": "Flink pod",
+        "query": "label_values(flink_jobmanager_numRunningJobs{job=\\\"cp-flink\\\",flink_cluster_id=~\\\"$flink_cluster_id\\\"}, pod)",
+        "definition": "label_values(flink_jobmanager_numRunningJobs{job=\\\"cp-flink\\\",flink_cluster_id=~\\\"$flink_cluster_id\\\"}, pod)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      },
+      {
+        "name": "cluster_link",
+        "type": "query",
+        "label": "Cluster Link",
+        "query": "label_values(kafka_server_cluster_link_metrics_link_count{job=\\\"cfk-jmx\\\"}, link_name)",
+        "definition": "label_values(kafka_server_cluster_link_metrics_link_count{job=\\\"cfk-jmx\\\"}, link_name)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      },
+      {
+        "name": "connector",
+        "type": "query",
+        "label": "Connector",
+        "query": "label_values(kafka_connect_connector_metrics_connector_total_task_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\"}, connector)",
+        "definition": "label_values(kafka_connect_connector_metrics_connector_total_task_count{job=\"cfk-jmx\",kubernetes_namespace=~\"$namespace\"}, connector)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Confluent Platform / CFK - $namespace",
+  "uid": "confluent-platform-cfk",
+  "version": 3,
+  "description": "Kafka, KRaft, Schema Registry, Connect and connectors, REST Proxy, Cluster Linking, Self-Balancing Cluster, and CP Flink."
+}

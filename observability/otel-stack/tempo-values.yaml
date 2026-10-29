@@ -1,0 +1,75 @@
+# Grafana Tempo (single-binary) — minimal values for the traces pilot.
+# Deployed into the `monitoring` namespace so Grafana can reach it as a
+# datasource via local DNS at tempo.monitoring.svc.cluster.local.
+#
+# Local filesystem storage is fine for a pilot; swap to s3 when we want
+# persistence beyond pod lifetime.
+
+tempo:
+  retention: 24h
+  reportingEnabled: false
+
+  # Receivers: OTel Collector (in cflt-east1) pushes traces here via OTLP/gRPC.
+  # Also keep HTTP (4318) open for ad-hoc testing.
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+
+  # 2026-10-19: raise ingestion rate limit from 15 MB/s default — with 12 pods
+  # pushing traces at 10% sampling (~5-10 MB/s per burst), the default was
+  # getting hit and traces dropped. 100 MB/s has plenty of headroom.
+  #
+  # Also activate metrics-generator processors (service-graphs + span-metrics)
+  # via standard overrides so Grafana span-latency panels work.
+  overrides:
+    defaults:
+      ingestion:
+        rate_limit_bytes: 100000000
+        burst_size_bytes: 200000000
+      global:
+        max_bytes_per_trace: 50000000
+      metrics_generator:
+        processors:
+          - service-graphs
+          - span-metrics
+
+  # Metrics-generator produces RED metrics + service graphs from spans and
+  # pushes them to Prometheus via remote-write.
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: http://kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClassName: production-storage-class
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2
+    memory: 4Gi
+
+service:
+  type: ClusterIP
+
+# 2026-10-19: pin to arm64 — only 1 of 16 nodes is amd64 and it's a tiny
+# t3.medium jumpnode (2 vCPU / 4 Gi) that goes NotReady under any real load.
+# Previous Tempo install landed on it and the pod got evicted.
+nodeSelector:
+  kubernetes.io/arch: arm64
+

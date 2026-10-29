@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omb-jmx-exporter-config
+  namespace: ${NAMESPACE}
+  labels:
+    app: omb
+    sweep: ir-ab-2026-10-23
+data:
+  kafka-client.yml: |
+    # IMPORTANT: JMX Prometheus exporter behavior:
+    #   - No rules at all → every MBean exported with default naming.
+    #   - Any rules present → non-matching MBeans are DROPPED.
+    # Earlier version had only 4 java.lang rules → silently dropped every kafka.*
+    # client metric. This version adds explicit rules + catchall at end.
+    lowercaseOutputName: true
+    lowercaseOutputLabelNames: true
+
+    rules:
+      # ───── Kafka producer: top-level per-client metrics ─────
+      - pattern: 'kafka.producer<type=producer-metrics, client-id=(.+)><>(.+):'
+        name: kafka_producer_$2
+        labels:
+          client_id: "$1"
+        type: GAUGE
+
+      # ───── Kafka producer: per-topic per-client metrics ─────
+      - pattern: 'kafka.producer<type=producer-topic-metrics, client-id=(.+), topic=(.+)><>(.+):'
+        name: kafka_producer_topic_$3
+        labels:
+          client_id: "$1"
+          topic: "$2"
+        type: GAUGE
+
+      # ───── Kafka producer: per-node metrics (one per broker it talks to) ─────
+      - pattern: 'kafka.producer<type=producer-node-metrics, client-id=(.+), node-id=(.+)><>(.+):'
+        name: kafka_producer_node_$3
+        labels:
+          client_id: "$1"
+          node_id: "$2"
+        type: GAUGE
+
+      # ───── Kafka consumer: fetch-manager (records consumed, lag, fetch latency) ─────
+      - pattern: 'kafka.consumer<type=consumer-fetch-manager-metrics, client-id=(.+)><>(.+):'
+        name: kafka_consumer_$2
+        labels:
+          client_id: "$1"
+        type: GAUGE
+
+      - pattern: 'kafka.consumer<type=consumer-fetch-manager-metrics, client-id=(.+), topic=(.+)><>(.+):'
+        name: kafka_consumer_topic_$3
+        labels:
+          client_id: "$1"
+          topic: "$2"
+        type: GAUGE
+
+      - pattern: 'kafka.consumer<type=consumer-fetch-manager-metrics, client-id=(.+), topic=(.+), partition=(.+)><>(.+):'
+        name: kafka_consumer_partition_$4
+        labels:
+          client_id: "$1"
+          topic: "$2"
+          partition: "$3"
+        type: GAUGE
+
+      # ───── Kafka consumer: coordinator (rebalance, commit, heartbeat) ─────
+      - pattern: 'kafka.consumer<type=consumer-coordinator-metrics, client-id=(.+)><>(.+):'
+        name: kafka_consumer_$2
+        labels:
+          client_id: "$1"
+        type: GAUGE
+
+      # ───── Kafka consumer: top-level per-client (io ratio, select rate, request latency) ─────
+      - pattern: 'kafka.consumer<type=consumer-metrics, client-id=(.+)><>(.+):'
+        name: kafka_consumer_$2
+        labels:
+          client_id: "$1"
+        type: GAUGE
+
+      - pattern: 'kafka.consumer<type=consumer-node-metrics, client-id=(.+), node-id=(.+)><>(.+):'
+        name: kafka_consumer_node_$3
+        labels:
+          client_id: "$1"
+          node_id: "$2"
+        type: GAUGE
+
+      # ───── JVM: thread counts ─────
+      - pattern: 'java.lang<type=Threading><>(ThreadCount|DaemonThreadCount|PeakThreadCount|TotalStartedThreadCount):'
+        name: jvm_threads_$1
+        type: GAUGE
+
+      # ───── JVM: heap / non-heap memory ─────
+      - pattern: 'java.lang<type=Memory><(Heap|NonHeap)MemoryUsage>(init|used|committed|max):'
+        name: jvm_memory_$2_bytes
+        labels:
+          area: "$1"
+        type: GAUGE
+
+      # ───── JVM: GC per-collector ─────
+      - pattern: 'java.lang<type=GarbageCollector, name=(.+)><>(CollectionCount|CollectionTime):'
+        name: jvm_gc_$2
+        labels:
+          collector: "$1"
+        type: COUNTER
+
+      # ───── JVM: OS metrics (process cpu, fds, memory) ─────
+      - pattern: 'java.lang<type=OperatingSystem><>(ProcessCpuLoad|SystemCpuLoad|SystemLoadAverage|OpenFileDescriptorCount|MaxFileDescriptorCount|FreePhysicalMemorySize|TotalPhysicalMemorySize|ProcessCpuTime):'
+        name: jvm_os_$1
+        type: GAUGE
+
+      # ───── Catch-all safety net (anything not matched above gets default naming) ─────
+      - pattern: ".*"

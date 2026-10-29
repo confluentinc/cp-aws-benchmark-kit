@@ -1,0 +1,32 @@
+# Topology A patch — adds the custom CLUSTERLINK listener with per-broker NLBs.
+# Applied to the base Kafka CR via Kustomize overlay (overlay/east1/, overlay/east2/).
+#
+# CFK's `externalAccess: {type: loadBalancer}` creates one NLB per broker + one
+# bootstrap NLB. For 15 brokers that's 16 NLBs per region. AWS LB Controller
+# provisions them from the aws-load-balancer-* annotations below.
+#
+# PLACEHOLDERS replaced by overlay-level envsubst in install.sh:
+#   __DOMAIN__      → DOMAIN_REGION{1,2} from .env
+#   __SUBNETS__     → NGINX_INGRESS_SUBNETS_REGION{1,2} from .env (same subnets, used here for NLB IP placement)
+
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+spec:
+  listeners:
+    custom:
+      - name: clusterlink
+        port: 9098
+        externalAccess:
+          type: loadBalancer
+          loadBalancer:
+            domain: __DOMAIN__
+            bootstrapPrefix: bootstrap
+            brokerPrefix: broker
+            advertisedPort: 9098
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-type: external
+              service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+              service.beta.kubernetes.io/aws-load-balancer-subnets: "__SUBNETS__"

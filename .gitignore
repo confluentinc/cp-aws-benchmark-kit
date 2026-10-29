@@ -1,0 +1,47 @@
+# ─── Secrets / environment ───
+.env
+*.pem
+*.key
+*.p12
+*.jks
+jksPassword.txt
+confluent-license*.yml
+!confluent-license-secret.yaml.example
+
+# ─── Terraform ───
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+terraform.rc
+override.tf
+override.tf.json
+crash.log
+crash.*.log
+
+# ─── Benchmark results (per-run artifacts) ───
+benchmark/results/*
+!benchmark/results/.gitkeep
+
+# ─── Rendered templates ───
+*.rendered.yaml
+*.generated.yaml
+/tmp/
+
+# ─── Vendored OMB fork (users clone it per README) ───
+benchmark/omb/openmessaging-benchmark/
+
+# ─── OS cruft ───
+.DS_Store
+Thumbs.db
+
+# ─── Editor ───
+.vscode/
+.idea/
+*.swp
+*~
+
+# ─── Backup files from sed -i ───
+*.bak

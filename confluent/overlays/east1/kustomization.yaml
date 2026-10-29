@@ -1,0 +1,75 @@
+# confluent/overlays/east1 — east1-specific overlay.
+#
+# Sets namespace, injects NAMESPACE env substitution for CFK CRs that reference
+# in-cluster service DNS (CC, SR, Connect, KsqlDB, Rest), and applies any
+# region-specific patches.
+#
+# After applying this overlay, apply ONE of:
+#   - client-path/topology-a-nlb-per-pod/overlay/     (adds custom clusterlink listener)
+#   - client-path/topology-b-nginx-ingress/overlay/   (adds EXTERNAL externalAccess)
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cflt-east1  # Auto-rewritten by scripts/render-overlays.sh from .env NAMESPACE_REGION1 — do not edit manually
+
+resources:
+  - ../../base
+
+# Note: the $(NAMESPACE) references in base/*.yaml are literal strings. We use
+# Kustomize's `replacements` to substitute them with the actual namespace value.
+# Namespace is automatically rewritten in all resources via `namespace:` above.
+# In-cluster service DNS values are set explicitly in the patches below.
+
+# Explicit value overrides for region-specific bits
+patches:
+  - target:
+      kind: ControlCenter
+      name: controlcenter
+    patch: |-
+      - op: replace
+        path: /spec/dependencies/schemaRegistry/url
+        value: http://schemaregistry.cflt-east1.svc.cluster.local:8081
+      - op: replace
+        path: /spec/dependencies/connect/0/url
+        value: http://connect.cflt-east1.svc.cluster.local:8083
+      - op: replace
+        path: /spec/dependencies/ksqldb/0/url
+        value: http://ksqldb.cflt-east1.svc.cluster.local:8088
+      - op: replace
+        path: /spec/dependencies/kafka/bootstrapEndpoint
+        value: kafka.cflt-east1.svc.cluster.local:9071
+  - target:
+      kind: SchemaRegistry
+      name: schemaregistry
+    patch: |-
+      - op: replace
+        path: /spec/dependencies/kafka/bootstrapEndpoint
+        value: kafka.cflt-east1.svc.cluster.local:9071
+  - target:
+      kind: Connect
+      name: connect
+    patch: |-
+      - op: replace
+        path: /spec/dependencies/kafka/bootstrapEndpoint
+        value: kafka.cflt-east1.svc.cluster.local:9071
+  - target:
+      kind: KsqlDB
+      name: ksqldb
+    patch: |-
+      - op: replace
+        path: /spec/dependencies/kafka/bootstrapEndpoint
+        value: kafka.cflt-east1.svc.cluster.local:9071
+      - op: replace
+        path: /spec/dependencies/schemaRegistry/url
+        value: http://schemaregistry.cflt-east1.svc.cluster.local:8081
+  - target:
+      kind: KafkaRestProxy
+      name: kafkarestproxy
+    patch: |-
+      - op: replace
+        path: /spec/dependencies/kafka/bootstrapEndpoint
+        value: kafka.cflt-east1.svc.cluster.local:9071
+      - op: replace
+        path: /spec/dependencies/schemaRegistry/url
+        value: http://schemaregistry.cflt-east1.svc.cluster.local:8081

@@ -1,0 +1,349 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {"type": "datasource", "uid": "grafana"},
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "OMB IR A/B sweep — consumer-side deep dive. Headline KPIs + node + pod + JVM + Kafka client. Filter by sweep=ir-ab-2026-10-21.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 50,
+      "panels": [],
+      "title": "Row 0 — HEADLINE: Is the consumer keeping up?",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "cps"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 1},
+      "id": 51,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10",
+      "targets": [
+        {"expr": "sum(kafka_producer_producer_metrics_record_send_rate{pod=~\"omb-worker-ir-sweep-.*\"})", "refId": "A"}
+      ],
+      "title": "Produce rate (total records/sec)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "cps"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 1},
+      "id": 52,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10",
+      "targets": [
+        {"expr": "sum(kafka_consumer_consumer_fetch_manager_metrics_records_consumed_rate{pod=~\"omb-worker-ir-sweep-.*\"})", "refId": "A"}
+      ],
+      "title": "Consume rate (total records/sec)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 5000}, {"color": "red", "value": 50000}]}, "unit": "cps"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 1},
+      "id": 53,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10",
+      "targets": [
+        {"expr": "sum(kafka_producer_producer_metrics_record_send_rate{pod=~\"omb-worker-ir-sweep-.*\"}) - sum(kafka_consumer_consumer_fetch_manager_metrics_records_consumed_rate{pod=~\"omb-worker-ir-sweep-.*\"})", "refId": "A"}
+      ],
+      "title": "Backlog growth rate (prod - cons) — target ≈ 0",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 10000}, {"color": "red", "value": 100000}]}, "unit": "none"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 1},
+      "id": 54,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "10",
+      "targets": [
+        {"expr": "max(kafka_consumer_consumer_fetch_manager_metrics_records_lag_max{pod=~\"omb-worker-ir-sweep-.*\"})", "refId": "A"}
+      ],
+      "title": "Max consumer records lag (across all pods)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "cps"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 24, "x": 0, "y": 5},
+      "id": 55,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "sum(kafka_producer_producer_metrics_record_send_rate{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "produce rate (total)", "refId": "A"},
+        {"expr": "sum(kafka_consumer_consumer_fetch_manager_metrics_records_consumed_rate{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "consume rate (total)", "refId": "B"},
+        {"expr": "sum(kafka_producer_producer_metrics_record_send_rate{pod=~\"omb-worker-ir-sweep-.*\"}) - sum(kafka_consumer_consumer_fetch_manager_metrics_records_consumed_rate{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "gap (prod - cons)", "refId": "C"}
+      ],
+      "title": "Produce rate vs Consume rate (gap should stay near zero if consumer is keeping up)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 11},
+      "id": 100,
+      "panels": [],
+      "title": "Row 1 — Node-level resources (omb-client nodes)",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisLabel": "%", "drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "max": 100, "min": 0, "unit": "percent"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "id": 101,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[1m])) * 100) and on (instance) label_replace(kube_node_labels{label_cflt_cp_nodetype=\"omb-client\"}, \"instance\", \"$1\", \"node\", \"(.+)\")", "legendFormat": "{{instance}}", "refId": "A"}
+      ],
+      "title": "Node CPU % (omb-client nodes)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisLabel": "%", "drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "max": 100, "min": 0, "unit": "percent"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "id": 102,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 and on (instance) label_replace(kube_node_labels{label_cflt_cp_nodetype=\"omb-client\"}, \"instance\", \"$1\", \"node\", \"(.+)\")", "legendFormat": "{{instance}}", "refId": "A"}
+      ],
+      "title": "Node memory % used (omb-client nodes)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 20},
+      "id": 150,
+      "panels": [],
+      "title": "Row 2 — Pod-level resources (per OMB worker)",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisLabel": "cores", "drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "none"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21},
+      "id": 151,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"cflt-east1\", pod=~\"omb-worker-ir-sweep-.*\", container=\"worker\"}[1m]))", "legendFormat": "{{pod}}", "refId": "A"}
+      ],
+      "title": "Pod CPU usage (cores) — limit = 28",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisLabel": "%", "drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "max": 100, "min": 0, "unit": "percent"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21},
+      "id": 152,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "100 * sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"cflt-east1\", pod=~\"omb-worker-ir-sweep-.*\", container=\"worker\"}[1m])) / 28", "legendFormat": "{{pod}} % of 28-core limit", "refId": "A"}
+      ],
+      "title": "Pod CPU utilization (% of 28-core limit)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "bytes"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 29},
+      "id": 153,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "container_memory_working_set_bytes{namespace=\"cflt-east1\", pod=~\"omb-worker-ir-sweep-.*\", container=\"worker\"}", "legendFormat": "{{pod}}", "refId": "A"}
+      ],
+      "title": "Pod memory working set — limit = 56 GiB",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "Bps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 29},
+      "id": 154,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "sum by (pod) (rate(container_network_receive_bytes_total{namespace=\"cflt-east1\", pod=~\"omb-worker-ir-sweep-.*\"}[1m]))", "legendFormat": "{{pod}} RX", "refId": "A"},
+        {"expr": "sum by (pod) (rate(container_network_transmit_bytes_total{namespace=\"cflt-east1\", pod=~\"omb-worker-ir-sweep-.*\"}[1m]))", "legendFormat": "{{pod}} TX", "refId": "B"}
+      ],
+      "title": "Pod network RX + TX",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 37},
+      "id": 200,
+      "panels": [],
+      "title": "Row 3 — JVM (threads, heap, GC) per worker pod",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "none"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 38},
+      "id": 201,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "jvm_threads_threadcount{pod=~\"omb-worker-ir-sweep-.*\"}", "legendFormat": "{{pod}} live", "refId": "A"},
+        {"expr": "jvm_threads_daemonthreadcount{pod=~\"omb-worker-ir-sweep-.*\"}", "legendFormat": "{{pod}} daemon", "refId": "B"}
+      ],
+      "title": "JVM thread count (live + daemon)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "bytes"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 38},
+      "id": 202,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "jvm_memory_used_bytes{area=\"Heap\", pod=~\"omb-worker-ir-sweep-.*\"}", "legendFormat": "{{pod}} heap used", "refId": "A"},
+        {"expr": "jvm_memory_committed_bytes{area=\"Heap\", pod=~\"omb-worker-ir-sweep-.*\"}", "legendFormat": "{{pod}} heap committed", "refId": "B"}
+      ],
+      "title": "JVM heap (used + committed)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "ms"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 46},
+      "id": 203,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "rate(jvm_gc_collectiontime{pod=~\"omb-worker-ir-sweep-.*\"}[1m])", "legendFormat": "{{pod}} / {{collector}}", "refId": "A"}
+      ],
+      "title": "JVM GC time (ms/sec of pause)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "ops"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 46},
+      "id": 204,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "rate(jvm_gc_collectioncount{pod=~\"omb-worker-ir-sweep-.*\"}[1m])", "legendFormat": "{{pod}} / {{collector}}", "refId": "A"}
+      ],
+      "title": "JVM GC count (collections/sec)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 54},
+      "id": 300,
+      "panels": [],
+      "title": "Row 4 — Kafka consumer client metrics",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "cps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 55},
+      "id": 301,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "sum by (pod) (kafka_consumer_consumer_fetch_manager_metrics_records_consumed_rate{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "{{pod}}", "refId": "A"}
+      ],
+      "title": "Consumer records consumed rate (per pod)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "ms"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 55},
+      "id": 302,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "avg by (pod) (kafka_consumer_consumer_fetch_manager_metrics_fetch_latency_avg{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "{{pod}} avg", "refId": "A"},
+        {"expr": "max by (pod) (kafka_consumer_consumer_fetch_manager_metrics_fetch_latency_max{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "{{pod}} max", "refId": "B"}
+      ],
+      "title": "Consumer fetch latency (avg + max per pod)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "none"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 63},
+      "id": 303,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "max by (pod) (kafka_consumer_consumer_fetch_manager_metrics_records_lag_max{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "{{pod}}", "refId": "A"}
+      ],
+      "title": "Consumer records lag max (per pod)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "none"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 63},
+      "id": 304,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "sum by (pod) (kafka_consumer_consumer_coordinator_metrics_rebalance_rate_per_hour{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "{{pod}} rebalance/hr", "refId": "A"},
+        {"expr": "sum by (pod) (kafka_consumer_consumer_coordinator_metrics_commit_rate{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "{{pod}} commits/sec", "refId": "B"}
+      ],
+      "title": "Consumer coordination (rebalance + commit)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 71},
+      "id": 400,
+      "panels": [],
+      "title": "Row 5 — Producer latency + symmetry",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "ms"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 72},
+      "id": 401,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "avg by (pod) (kafka_producer_producer_metrics_request_latency_avg{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "{{pod}} avg", "refId": "A"},
+        {"expr": "max by (pod) (kafka_producer_producer_metrics_request_latency_max{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "{{pod}} max", "refId": "B"}
+      ],
+      "title": "Producer request latency (avg + max per pod)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 1}, "unit": "ms"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 72},
+      "id": 402,
+      "options": {"legend": {"displayMode": "table", "placement": "right"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {"expr": "avg(kafka_producer_producer_metrics_request_latency_avg{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "producer request latency avg", "refId": "A"},
+        {"expr": "avg(kafka_consumer_consumer_fetch_manager_metrics_fetch_latency_avg{pod=~\"omb-worker-ir-sweep-.*\"})", "legendFormat": "consumer fetch latency avg", "refId": "B"}
+      ],
+      "title": "Producer vs Consumer latency (avg, cluster-wide)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["omb", "ir-ab-sweep", "benchmark"],
+  "templating": {"list": []},
+  "time": {"from": "now-30m", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "OMB Consumer Deep Dive — IR A/B",
+  "uid": "omb-ir-ab-consumer-dd",
+  "version": 2,
+  "weekStart": ""
+}

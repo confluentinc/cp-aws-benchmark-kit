@@ -1,0 +1,46 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+spec:
+  license:
+    secretRef: confluent-license
+  image:
+    application: docker.io/confluentinc/cp-server:8.3.1
+    init: confluentinc/confluent-init-container:3.3.1
+  replicas: 3
+  oneReplicaPerNode: true
+  dataVolumeCapacity: 10G
+  storageClass:
+    name: production-storage-class
+  tls:
+    secretRef: kraft-tls
+  listeners:
+    controller:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.-]*)?.*/$1/
+      tls:
+        enabled: true
+  podTemplate:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cflt-cp-nodeType
+              operator: In
+              values:
+              - broker
+  # In split-KRaft (dedicated controller nodes), leader-rebalance config lives
+  # on the controller CR, not Kafka CR — controller runs the periodic imbalance
+  # check and auto-rebalance scheduler.
+  configOverrides:
+    server:
+      - auto.leader.rebalance.enable=true
+      - leader.imbalance.per.broker.percentage=1   # aggressive (default 10%)
+      - leader.imbalance.check.interval.seconds=1  # aggressive (default 300s)
+      - default.replication.factor=3
+      - listener.name.controller.ssl.principal.mapping.rules=RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.-]*)?.*/$1/
+      - listener.name.controller.ssl.client.auth=required

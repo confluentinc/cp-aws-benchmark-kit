@@ -1,0 +1,17 @@
+# Copy to terraform.tfvars and fill in. Mirror these values in .env at the repo root.
+
+aws_profile  = "my-profile"
+region       = "us-east-1"
+cluster_name = "cp-east1"
+
+kubernetes_version = "1.36"
+
+vpc_cidr                     = "10.101.0.0/16"
+cluster_public_access_cidrs  = ["0.0.0.0/0"]     # narrow this for production
+
+broker_count        = 15
+broker_instance     = "r7g.8xlarge"
+omb_worker_count    = 10
+omb_worker_instance = "c7gn.8xlarge"
+
+route53_zone_name = "cl.cp.east1.example.internal"

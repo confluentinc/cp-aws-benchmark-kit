@@ -1,0 +1,18 @@
+# confluent/base — Kustomize base for Confluent Platform CRs
+#
+# This base is region-agnostic. Namespace, region-specific domain names, subnet
+# IDs, and client-path externalAccess are patched in by:
+#   - confluent/overlays/east{1,2}/   (namespace + region defaults)
+#   - client-path/topology-{a,b}/     (externalAccess block for the chosen topology)
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - kraft-controller.yaml
+  - kafka.yaml
+  - control-center.yaml
+  - schema-registry.yaml
+  - connect.yaml
+  - ksqldb.yaml
+  - kafka-rest.yaml

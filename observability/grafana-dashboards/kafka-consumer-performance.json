@@ -1,0 +1,851 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Consumer throughput and lag",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Records, fetches, and bytes consumed",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_consumer_consumer_fetch_manager_metrics_records_consumed_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_records_consumed_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} records/sec",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_consumer_consumer_fetch_manager_metrics_fetch_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_fetch_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} fetches/sec",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_consumer_consumer_fetch_manager_metrics_bytes_consumed_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_bytes_consumed_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} bytes/sec",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Consumer lag and throttling",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_consumer_consumer_fetch_manager_metrics_records_lag_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_records_lag_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} max records lag",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_fetch_manager_metrics_fetch_throttle_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_fetch_throttle_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} fetch throttle ms",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Consumer fetch performance",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Fetch latency and size",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_fetch_manager_metrics_fetch_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_fetch_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} fetch latency",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_fetch_manager_metrics_fetch_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_fetch_size_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} fetch bytes",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_fetch_manager_metrics_records_per_request_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_records_per_request_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} records/fetch",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Consumer I/O and assignment",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_metrics_io_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_io_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} I/O ratio",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_metrics_io_wait_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_io_wait_ratio{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} I/O wait ratio",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_consumer_consumer_coordinator_metrics_assigned_partitions{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_assigned_partitions{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} assigned partitions",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Consumer group coordination / commit tuning",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Consumer coordination",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_coordinator_metrics_sync_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_sync_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} sync time",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_consumer_consumer_coordinator_metrics_sync_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_sync_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} syncs/sec",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_coordinator_metrics_commit_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_commit_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} commit latency",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "Consumer commit and records-per-fetch efficiency",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_coordinator_metrics_commit_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_commit_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} commits/sec",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_fetch_manager_metrics_records_per_request_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_records_per_request_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} records/fetch",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 30,
+      "type": "row",
+      "title": "Per-partition lag detail (why lag is building)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 31,
+      "type": "timeseries",
+      "title": "Lag by topic-partition",
+      "description": "Per-partition breakdown -- a single hot/skewed partition often explains lag that the aggregate records-lag-max panel hides.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(kafka_consumer_consumer_fetch_manager_metrics_records_lag{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_records_lag{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})",
+          "legendFormat": "{{client_id}} {{topic}}-{{partition}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "type": "timeseries",
+      "title": "Lag average vs lead (headroom to falling off retention)",
+      "description": "records-lead-min falling toward zero means this consumer is at risk of falling off the log's retention window and losing data, not just running behind.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_fetch_manager_metrics_records_lag_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_records_lag_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} lag avg",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "min((kafka_consumer_consumer_fetch_manager_metrics_records_lead_min{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_records_lead_min{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} lead min",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "type": "row",
+      "title": "Rebalance activity (a top cause of lag spikes)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 34,
+      "type": "timeseries",
+      "title": "Rebalance rate & latency",
+      "description": "Every rebalance stops consumption for the group while partitions are reassigned -- frequent rebalances are usually the biggest single driver of sudden lag spikes.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_consumer_consumer_coordinator_metrics_rebalance_rate_per_hour{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_rebalance_rate_per_hour{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} rebalances/hour",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_consumer_consumer_coordinator_metrics_failed_rebalance_rate_per_hour{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_failed_rebalance_rate_per_hour{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} failed rebalances/hour",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_coordinator_metrics_rebalance_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_rebalance_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} rebalance latency avg (ms)",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "type": "timeseries",
+      "title": "Rebalance phase breakdown",
+      "description": "Slow partitions-revoked latency usually means your rebalance listener / offset-commit-on-revoke logic is doing too much work.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_coordinator_metrics_partition_assigned_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_partition_assigned_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} partitions-assigned latency",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_coordinator_metrics_partition_revoked_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_partition_revoked_latency_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} partitions-revoked latency",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_coordinator_metrics_join_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_join_time_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} group-join latency",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "type": "row",
+      "title": "Consumer session, heartbeat & poll-loop health",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 37,
+      "type": "timeseries",
+      "title": "Heartbeats & session risk",
+      "description": "last-heartbeat-seconds-ago approaching session.timeout.ms means the group coordinator is about to evict this member and force a rebalance.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum((kafka_consumer_consumer_coordinator_metrics_heartbeat_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_heartbeat_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} heartbeats/sec",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_consumer_consumer_coordinator_metrics_heartbeat_response_time_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_heartbeat_response_time_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} heartbeat response time max",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_consumer_consumer_coordinator_metrics_last_heartbeat_seconds_ago{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_last_heartbeat_seconds_ago{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} seconds since last heartbeat",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "type": "timeseries",
+      "title": "Poll loop: is Kafka slow, or is your application slow?",
+      "description": "A low poll-idle-ratio with large time-between-poll means your application's record-processing code is the bottleneck, not fetch/network -- scaling brokers or tuning fetch.min.bytes won't help until that's fixed.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_metrics_poll_idle_ratio_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_poll_idle_ratio_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} poll idle ratio",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "avg((kafka_consumer_consumer_metrics_time_between_poll_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_time_between_poll_avg{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} time between poll avg",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_consumer_consumer_metrics_time_between_poll_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_time_between_poll_max{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} time between poll max",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max((kafka_consumer_consumer_metrics_last_poll_seconds_ago{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"} or kafka_consumer_last_poll_seconds_ago{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\",client_id=~\"$consumer_client\"})) by (client_id)",
+          "legendFormat": "{{client_id}} seconds since last poll",
+          "refId": "D"
+        }
+      ]
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "confluent",
+    "kafka",
+    "consumer",
+    "performance",
+    "lag"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "query": "prometheus",
+        "label": "Prometheus",
+        "current": {
+          "text": "Prometheus",
+          "value": "Prometheus"
+        },
+        "hide": 0
+      },
+      {
+        "name": "namespace",
+        "type": "query",
+        "label": "Namespace",
+        "query": "label_values(up{job=\\\"kafka-client-jmx\\\"}, namespace)",
+        "definition": "label_values(up{job=\\\"kafka-client-jmx\\\"}, namespace)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "cflt-east1",
+          "value": "cflt-east1"
+        }
+      },
+      {
+        "name": "pod",
+        "type": "query",
+        "label": "Client pod",
+        "query": "label_values(up{job=\\\"kafka-client-jmx\\\",namespace=~\\\"$namespace\\\"}, pod)",
+        "definition": "label_values(up{job=\\\"kafka-client-jmx\\\",namespace=~\\\"$namespace\\\"}, pod)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      },
+      {
+        "name": "consumer_client",
+        "type": "query",
+        "label": "Client ID",
+        "query": "label_values((kafka_consumer_consumer_fetch_manager_metrics_records_consumed_rate{job=\\\"kafka-client-jmx\\\",namespace=~\\\"$namespace\\\",pod=~\\\"$pod\\\"} or kafka_consumer_records_consumed_rate{job=\"kafka-client-jmx\",namespace=~\"$namespace\",pod=~\"$pod\"}), client_id)",
+        "definition": "label_values(kafka_consumer_consumer_fetch_manager_metrics_records_consumed_rate{job=\\\"kafka-client-jmx\\\",namespace=~\\\"$namespace\\\",pod=~\\\"$pod\\\"}, client_id)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "current": {
+          "text": "All",
+          "value": ".+"
+        }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Kafka Consumer Performance / Tuning",
+  "uid": "kafka-consumer-performance",
+  "version": 1
+}

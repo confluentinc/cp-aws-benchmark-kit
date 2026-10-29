@@ -1,0 +1,27 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-ksqldb-server:8.3.1
+    init: confluentinc/confluent-init-container:3.3.1
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.$(NAMESPACE).svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        secretRef: client-tls-admin
+    schemaRegistry:
+      url: http://schemaregistry.$(NAMESPACE).svc.cluster.local:8081
+  podTemplate:
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi
+      requests:
+        cpu: "1"
+        memory: 2Gi

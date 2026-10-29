@@ -1,0 +1,37 @@
+# Bidirectional ClusterLink CR template. The direction (east1→east2 vs east2→east1)
+# is set per overlay via the sourceKafkaCluster.bootstrapEndpoint value.
+#
+# Each region deploys ONE ClusterLink CR with linkMode=Bidirectional + Outbound
+# connection, pointing at the OTHER region's bootstrap NLB on port 9098
+# (PLAINTEXT CLUSTERLINK listener).
+
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: east-link
+spec:
+  kafkaClusterRef:
+    name: kafka
+  # Source bootstrap endpoint is set per overlay — points at the OTHER region.
+  sourceKafkaCluster:
+    bootstrapEndpoint: PLACEHOLDER_PATCHED_BY_OVERLAY
+  linkMode: Bidirectional
+  connectionMode: Outbound
+  # Mirror topic prefix on the SOURCE side when mirroring from this cluster back to the other.
+  # Overlay patches this if the mirror naming convention needs to differ per direction.
+  mirrorTopicOptions:
+    prefix: PLACEHOLDER_PATCHED_BY_OVERLAY
+    autoCreateMirrorTopic:
+      enabled: true
+      filters:
+        - name: test-topic-prefix
+          patternType: PREFIXED
+          filterType: INCLUDE
+          topicPattern: test-topic
+  configs:
+    - num.cluster.link.fetchers=16
+    - replica.fetch.max.bytes=10485760
+    - replica.fetch.response.max.bytes=104857600
+    - replica.fetch.wait.max.ms=5
+    - replica.fetch.backoff.ms=10
+    - replica.socket.receive.buffer.bytes=-1

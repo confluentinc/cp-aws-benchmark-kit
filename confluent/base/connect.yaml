@@ -1,0 +1,24 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect:8.3.1
+    init: confluentinc/confluent-init-container:3.3.1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.$(NAMESPACE).svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        secretRef: client-tls-admin
+  podTemplate:
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi
+      requests:
+        cpu: "1"
+        memory: 2Gi

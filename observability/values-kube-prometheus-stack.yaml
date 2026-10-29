@@ -1,0 +1,247 @@
+# Namespace-aware values: CFK operator in confluent, monitoring stack in monitoring, CP/client resources in cflt-east1.
+namespaceOverride: __MONITORING_NAMESPACE__
+
+grafana:
+  enabled: true
+  adminUser: admin
+  # Disable the chart-generated default datasource; the explicit datasource below is the only default.
+  defaultDatasourceEnabled: false
+  persistence:
+    enabled: false
+  service:
+    type: ClusterIP
+    # Expose Grafana on its native HTTP port so the sidecar URL is unambiguous.
+    port: 3000
+    targetPort: 3000
+  # Explicitly probe Grafana's container port, not the Service port.
+  readinessProbe:
+    httpGet:
+      path: /api/health
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 30
+    timeoutSeconds: 10
+    periodSeconds: 10
+    failureThreshold: 12
+  livenessProbe:
+    httpGet:
+      path: /api/health
+      port: 3000
+      scheme: HTTP
+    initialDelaySeconds: 60
+    timeoutSeconds: 10
+    periodSeconds: 20
+    failureThreshold: 6
+  startupProbe:
+    httpGet:
+      path: /api/health
+      port: 3000
+      scheme: HTTP
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 30
+  # Allow dashboard viewing without a Grafana login.
+  # The provisioning sidecar still waits for Grafana readiness before reload.
+  # 2026-10-19: anonymous role bumped Viewer -> Editor so Explore is visible
+  # (Viewer role hides Explore by default). Internal cluster, pilot usage.
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_role: Editor
+    auth.basic:
+      enabled: false
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: __MONITORING_NAMESPACE__
+      reloadURL: http://__MONITORING_RELEASE__-grafana.__MONITORING_NAMESPACE__.svc.cluster.local:3000/api/admin/provisioning/dashboards/reload
+      label: grafana_dashboard
+      labelValue: "1"
+      provider:
+        foldersFromFilesStructure: true
+    datasources:
+      enabled: false
+      defaultDatasourceEnabled: false
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          uid: prometheus
+          access: proxy
+          url: http://__MONITORING_RELEASE__-kube-prometheus-stack-prometheus.__MONITORING_NAMESPACE__.svc.cluster.local:9090
+          isDefault: true
+          editable: false
+        # 2026-10-19: Tempo tracing backend for OTel spans emitted by the
+        # latency-probe pods. Spans flow pod -> OTel Collector (cflt-east1) ->
+        # Tempo (monitoring ns). Grafana auto-renders via this datasource.
+        - name: Tempo
+          type: tempo
+          uid: tempo
+          access: proxy
+          url: http://tempo.__MONITORING_NAMESPACE__.svc.cluster.local:3200
+          editable: false
+          jsonData:
+            tracesToMetrics:
+              datasourceUid: prometheus
+        # 2026-10-19: Jaeger all-in-one as a parallel tracing backend. Receives
+        # the SAME OTel-emitted spans Tempo gets — side-by-side comparison to
+        # confirm Jaeger's UI doesn't reveal detail Tempo misses.
+        - name: Jaeger
+          type: jaeger
+          uid: jaeger
+          access: proxy
+          url: http://jaeger.__MONITORING_NAMESPACE__.svc.cluster.local:16686
+          editable: false
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    replicas: 1
+    retention: 7d
+    scrapeInterval: 15s
+    evaluationInterval: 15s
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    # 2026-10-19: enable native (base2 exponential) histograms to accept the
+    # exponential-aggregation OTel metrics from the latency-probe pods.
+    enableFeatures:
+      - native-histograms
+    # 2026-10-19: enable remote-write receiver so Tempo metrics-generator
+    # can push RED metrics + service graphs here. Powers Grafana Breakdown /
+    # Service structure / Comparison tabs on Tempo traces.
+    enableRemoteWriteReceiver: true
+    additionalScrapeConfigs:
+      - job_name: cfk-jmx
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        honor_labels: false
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - __CP_NAMESPACE__
+        relabel_configs:
+          # CFK-managed Confluent Platform pods carry confluent.platform=true.
+          - action: keep
+            source_labels:
+              - __meta_kubernetes_pod_label_confluent_platform
+            regex: "true"
+          - action: keep
+            source_labels:
+              - __meta_kubernetes_pod_phase
+            regex: Running
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_ip
+            target_label: __address__
+            regex: (.+)
+            replacement: $1:7778
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_namespace
+            target_label: kubernetes_namespace
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_name
+            target_label: kubernetes_pod_name
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_label_platform_confluent_io_type
+            target_label: platform_confluent_io_type
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_label_app
+            target_label: app
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_label_platform_confluent_io_type
+            target_label: component_type
+
+      # CP Flink uses the Flink Prometheus reporter on port 9249.
+      # CP Flink pods are identified by platform.confluent.io/origin=flink|manual.
+      - job_name: cp-flink
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        honor_labels: false
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - __CP_NAMESPACE__
+        relabel_configs:
+          - action: keep
+            source_labels:
+              - __meta_kubernetes_pod_label_platform_confluent_io_origin
+            regex: (flink|manual)
+          - action: keep
+            source_labels:
+              - __meta_kubernetes_pod_phase
+            regex: Running
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_ip
+            target_label: __address__
+            regex: (.+)
+            replacement: $1:9249
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_namespace
+            target_label: namespace
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_name
+            target_label: pod
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_label_app
+            target_label: app
+          - action: replace
+            target_label: job
+            replacement: cp-flink
+
+      # Client-side producer/consumer JMX metrics.
+      # Annotate client pods with prometheus.io/scrape=true and prometheus.io/port=<metrics-port>.
+      - job_name: kafka-client-jmx
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        honor_labels: false
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - __CP_NAMESPACE__
+        relabel_configs:
+          - action: keep
+            source_labels:
+              - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+            regex: "true"
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_annotation_prometheus_io_path
+            target_label: __metrics_path__
+            regex: (.+)
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_ip
+              - __meta_kubernetes_pod_annotation_prometheus_io_port
+            separator: ":"
+            target_label: __address__
+            regex: (.+)
+            replacement: $1
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_namespace
+            target_label: namespace
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_name
+            target_label: pod
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_label_app
+            target_label: app

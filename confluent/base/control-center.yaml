@@ -1,0 +1,33 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.9.0
+    init: confluentinc/confluent-init-container:3.3.1
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.$(NAMESPACE).svc.cluster.local:8081
+    connect:
+      - name: connect
+        url: http://connect.$(NAMESPACE).svc.cluster.local:8083
+    ksqldb:
+      - name: ksqldb
+        url: http://ksqldb.$(NAMESPACE).svc.cluster.local:8088
+    kafka:
+      bootstrapEndpoint: kafka.$(NAMESPACE).svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        secretRef: client-tls-admin
+  podTemplate:
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi
+      requests:
+        cpu: "1"
+        memory: 2Gi

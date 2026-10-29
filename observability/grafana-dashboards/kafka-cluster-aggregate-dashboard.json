@@ -1,0 +1,157 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "liveNow": false,
+  "panels": [
+    {"type":"row","title":"Cluster-wide throughput (east1 kafka brokers aggregate)","gridPos":{"h":1,"w":24,"x":0,"y":0},"collapsed":false},
+
+    {
+      "type": "stat",
+      "title": "Produce rate (aggregate bytes/sec in)",
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 1},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesInPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "Bps", "color": {"mode": "palette-classic"}}},
+      "options": {"colorMode": "value", "graphMode": "area"}
+    },
+    {
+      "type": "stat",
+      "title": "Consume rate (aggregate bytes/sec out)",
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 1},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesOutPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "Bps"}},
+      "options": {"colorMode": "value", "graphMode": "area"}
+    },
+    {
+      "type": "stat",
+      "title": "Messages in /sec (aggregate)",
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 1},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"MessagesInPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "ops"}},
+      "options": {"colorMode": "value", "graphMode": "area"}
+    },
+    {
+      "type": "stat",
+      "title": "Produce requests /sec (cluster)",
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 1},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"TotalProduceRequestsPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "ops"}},
+      "options": {"colorMode": "value", "graphMode": "area"}
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Aggregate throughput — produce vs consume (cluster-wide)",
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesInPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "legendFormat": "produce (bytes in)"},
+        {"expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesOutPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "legendFormat": "consume (bytes out)"},
+        {"expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"ReplicationBytesInPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "legendFormat": "replication (bytes in from followers)"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "Bps", "custom": {"drawStyle": "line", "lineWidth": 2, "fillOpacity": 20}}},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"]}}
+    },
+
+    {"type":"row","title":"Per-broker breakdown","gridPos":{"h":1,"w":24,"x":0,"y":15},"collapsed":false},
+    {
+      "type": "timeseries",
+      "title": "Produce rate per broker (bytes/s)",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 16},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "sum by (pod) (kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesInPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "legendFormat": "{{pod}}"}],
+      "fieldConfig": {"defaults": {"unit": "Bps"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Consume rate per broker (bytes/s)",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 16},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "sum by (pod) (kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesOutPerSec\",app=\"kafka\",namespace=\"cflt-east1\",topic=\"\"})", "legendFormat": "{{pod}}"}],
+      "fieldConfig": {"defaults": {"unit": "Bps"}}
+    },
+
+    {"type":"row","title":"Request latency — produce + fetch percentiles from broker JMX","gridPos":{"h":1,"w":24,"x":0,"y":25},"collapsed":false},
+    {
+      "type": "timeseries",
+      "title": "Produce request latency (ms) — p50/p95/p99/p99.9 max across brokers",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 26},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "max(kafka_network_requestmetrics_50thpercentile{request=\"Produce\",app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "p50"},
+        {"expr": "max(kafka_network_requestmetrics_95thpercentile{request=\"Produce\",app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "p95"},
+        {"expr": "max(kafka_network_requestmetrics_99thpercentile{request=\"Produce\",app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "p99"},
+        {"expr": "max(kafka_network_requestmetrics_999thpercentile{request=\"Produce\",app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "p99.9"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ms"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "FetchConsumer request latency (ms) — p50/p95/p99/p99.9",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 26},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "max(kafka_network_requestmetrics_50thpercentile{request=\"FetchConsumer\",app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "p50"},
+        {"expr": "max(kafka_network_requestmetrics_95thpercentile{request=\"FetchConsumer\",app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "p95"},
+        {"expr": "max(kafka_network_requestmetrics_99thpercentile{request=\"FetchConsumer\",app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "p99"},
+        {"expr": "max(kafka_network_requestmetrics_999thpercentile{request=\"FetchConsumer\",app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "p99.9"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ms"}}
+    },
+
+    {"type":"row","title":"Broker resources (CPU / memory / network, container-level)","gridPos":{"h":1,"w":24,"x":0,"y":35},"collapsed":false},
+    {
+      "type": "timeseries",
+      "title": "Broker CPU usage per broker (cores) — from container_cpu_usage_seconds_total",
+      "gridPos": {"h": 9, "w": 12, "x": 0, "y": 36},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "rate(container_cpu_usage_seconds_total{namespace=\"cflt-east1\",container=\"kafka\"}[1m])", "legendFormat": "{{pod}}"}],
+      "fieldConfig": {"defaults": {"unit": "none"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Broker memory working-set per broker",
+      "gridPos": {"h": 9, "w": 12, "x": 12, "y": 36},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "container_memory_working_set_bytes{namespace=\"cflt-east1\",container=\"kafka\"}", "legendFormat": "{{pod}}"}],
+      "fieldConfig": {"defaults": {"unit": "bytes"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Broker network RX + TX per broker (NIC saturation signal)",
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 45},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "sum by (pod) (rate(container_network_receive_bytes_total{namespace=\"cflt-east1\",pod=~\"kafka-[0-9]+\"}[1m]))", "legendFormat": "{{pod}} RX"},
+        {"expr": "sum by (pod) (rate(container_network_transmit_bytes_total{namespace=\"cflt-east1\",pod=~\"kafka-[0-9]+\"}[1m]))", "legendFormat": "{{pod}} TX"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "Bps"}}
+    },
+
+    {"type":"row","title":"Partition inventory + leader balance","gridPos":{"h":1,"w":24,"x":0,"y":54},"collapsed":false},
+    {
+      "type": "timeseries",
+      "title": "Partition count per broker (balance signal)",
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 55},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "sum by (pod) (kafka_cluster_partition_count{app=\"kafka\",namespace=\"cflt-east1\"})", "legendFormat": "{{pod}}"}],
+      "fieldConfig": {"defaults": {"unit": "none"}}
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["kafka", "cluster-aggregate", "cflt-east1"],
+  "templating": {"list": []},
+  "time": {"from": "now-30m", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "Kafka Cluster — Aggregate Throughput + Health (east1)",
+  "uid": "kafka-cluster-aggregate-east1",
+  "version": 2,
+  "weekStart": ""
+}

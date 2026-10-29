@@ -1,0 +1,108 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  # namespace set by overlay
+spec:
+  license:
+    secretRef: confluent-license
+  replicas: 15
+  oneReplicaPerNode: true
+  image:
+    application: confluentinc/cp-server:8.3.1
+    init: confluentinc/confluent-init-container:3.3.1
+  dataVolumeCapacity: 1024G
+  storageClass:
+    name: production-storage-class
+  tls:
+    secretRef: kafka-tls
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+      controllerListener:
+        authentication:
+          type: mtls
+        tls:
+          enabled: true
+  listeners:
+    internal:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.-]*)?.*/$1/
+      tls:
+        enabled: true
+
+    replication:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.-]*)?.*/$1/
+      tls:
+        enabled: true
+
+    # external listener and custom clusterlink listener are added by
+    # client-path/topology-{a,b}/patch-kafka-*.yaml overlays
+    external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.-]*)?.*/$1/
+      tls:
+        enabled: true
+  configOverrides:
+    server:
+      - inter.broker.listener.name=REPLICATION
+      - confluent.intelligent.replication.enable=true    # overridden by overlay via env substitution if needed
+      - confluent.cluster.link.enable=true
+      # Mirror topics inherit RF from this broker-level default when the
+      # cluster-link auto-create path doesn't set one explicitly. RF=3
+      # matches source topic durability.
+      - default.replication.factor=3
+      - num.io.threads=96
+      - num.network.threads=48
+      - num.replica.fetchers=8
+      - num.recovery.threads.per.data.dir=8
+      - log.segment.bytes=1073741824
+      - replica.lag.time.max.ms=45000
+      - confluent.balancer.enable=false
+      - confluent.consumer.lag.emitter.enabled=false
+      - confluent.tier.cleaner.enable=true
+      - confluent.tier.cleaner.feature.enable=true
+      - replica.fetch.max.bytes=10485760
+      - replica.fetch.wait.max.ms=5
+    jvm:
+      - "-Djava.io.tmpdir=/tmp"
+      - "-Xms32G"
+      - "-Xmx32G"
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cflt-cp-nodeType
+              operator: In
+              values:
+              - broker
+    resources:
+      limits:
+        cpu: "20"
+        memory: 100Gi
+      requests:
+        cpu: 18100m
+        memory: 100Gi
+  mountedVolumes:
+    volumeMounts:
+      - mountPath: /tmp/
+        name: kafka-tmp
+    volumes:
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 500Mi
+        name: kafka-tmp

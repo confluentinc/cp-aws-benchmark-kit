@@ -1,0 +1,22 @@
+# cluster-link/overlays/east1 — east1 side of bidirectional link.
+# This cluster (east1) connects OUTBOUND to east2's CLUSTERLINK bootstrap NLB.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cflt-east1
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: ClusterLink
+      name: east-link
+    patch: |-
+      - op: replace
+        path: /spec/sourceKafkaCluster/bootstrapEndpoint
+        value: bootstrap.cl.cp.east2.example.internal:9098
+      - op: replace
+        path: /spec/mirrorTopicOptions/prefix
+        value: cflt-east1-
